@@ -4,13 +4,13 @@ import br.com.ewapps.newsapp.model.ArticleCategory.*
 enum class ArticleCategory(
     val categoryName: String
 ) {
-    BUSINESS("negócios"),
-    ENTERTAINMENT("entretenimento"),
-    GENERAL("geral"),
-    HEALTH("saúde"),
-    SCIENCE("ciência"),
-    SPORTS("esportes"),
-    TECHNOLOGY("tecnologia")
+    BUSINESS("business"),
+    ENTERTAINMENT("entertainment"),
+    GENERAL("general"),
+    HEALTH("health"),
+    SCIENCE("sciense"),
+    SPORTS("sports"),
+    TECHNOLOGY("technology")
 }
 
 fun getAllArticleCategory(): List<ArticleCategory> {
