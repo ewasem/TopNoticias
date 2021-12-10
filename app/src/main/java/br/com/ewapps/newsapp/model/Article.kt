@@ -1,5 +1,9 @@
 package br.com.ewapps.newsapp.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class Article(
     val author: String? = null,
     val content: String? = null,
@@ -9,4 +13,4 @@ data class Article(
     val title: String? = null,
     val url: String? = null,
     val urlToImage: String? = null
-)
+) : Parcelable

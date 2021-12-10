@@ -1,5 +1,6 @@
 package br.com.ewapps.newsapp.ui
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,14 +14,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import br.com.ewapps.newsapp.BottomMenuScreen
-import br.com.ewapps.newsapp.MainActivity
 import br.com.ewapps.newsapp.components.BottomMenu
 import br.com.ewapps.newsapp.model.Article
+import br.com.ewapps.newsapp.model.AssetParamType
 import br.com.ewapps.newsapp.network.NewsManager
 import br.com.ewapps.newsapp.ui.screen.Categories
 import br.com.ewapps.newsapp.ui.screen.DetailScreen
 import br.com.ewapps.newsapp.ui.screen.Sources
 import br.com.ewapps.newsapp.ui.screen.TopNews
+import com.google.gson.Gson
 
 @Composable
 fun NewsApp() {
@@ -54,6 +56,8 @@ fun Navigation(
         BottomMenuScreen.TopNews.route, modifier = Modifier.padding(paddingValues = paddingValues)) {
             bottomNavigation(navController = navController, articles, newsManager)
 
+
+
             composable("DetailScreen/{index}",
                 arguments = listOf(navArgument("index") { type = NavType.IntType })
             ) { navBackStackEntry ->
@@ -68,6 +72,21 @@ fun Navigation(
                 }
 
             }
+
+            composable(
+                "DetailScreen/{article}",
+                arguments = listOf(
+                    navArgument("article") {
+                        type = AssetParamType()
+                    }
+                )
+            ) {
+                val article = it.arguments?.getParcelable<Article>("article")
+                if (article != null) {
+                    DetailScreen(article, scrollState, navController)
+                }
+            }
+
         }
     }
 
@@ -78,13 +97,11 @@ fun NavGraphBuilder.bottomNavigation(navController: NavController, article: List
         TopNews(navController = navController, articles = article)
     }
     composable(BottomMenuScreen.Categories.route) {
-        newsManager.onSelectedCateforyChanged("business")
-        newsManager.getArticlesByCategory("business")
 
-        Categories(newsManager = newsManager, onFetchCategory = {
+        Categories(onFetchCategory = {
             newsManager.onSelectedCateforyChanged(it)
             newsManager.getArticlesByCategory(it)
-        })
+        }, newsManager = newsManager, navController = navController)
     }
     composable(BottomMenuScreen.Sources.route) {
         Sources()

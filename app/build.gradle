@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'kotlin-parcelize'
 }
 
 android {
@@ -49,6 +50,7 @@ android {
 
 dependencies {
 
+    implementation 'com.google.code.gson:gson:2.8.9'
     implementation "com.squareup.okhttp3:logging-interceptor:4.7.2"
     implementation "com.github.skydoves:landscapist-coil:1.4.1"
     implementation 'com.squareup.moshi:moshi-kotlin:1.9.3'
@@ -63,7 +65,7 @@ dependencies {
     implementation "androidx.compose.material:material:$compose_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
-    implementation 'androidx.activity:activity-compose:1.3.0-alpha06'
+    implementation 'androidx.activity:activity-compose:1.4.0'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
