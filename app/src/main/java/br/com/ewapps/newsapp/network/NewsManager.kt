@@ -19,6 +19,14 @@ class NewsManager {
         _newsResponse
     }
 
+    val sourceName = mutableStateOf("techmundo.com.br")
+
+    private val _getArticleBySource = mutableStateOf(TopNewsResponse())
+    val getArticleBySource: MutableState<TopNewsResponse>
+        @Composable get() = remember {
+            _getArticleBySource
+        }
+
     private val _getArticleByCategory = mutableStateOf(TopNewsResponse())
     val getArticleByCategory: MutableState<TopNewsResponse>
         @Composable get() = remember {
@@ -69,6 +77,28 @@ class NewsManager {
                 }
             }
 
+            override fun onFailure(call: Call<TopNewsResponse>, t: Throwable) {
+                Log.d("error", "${t.printStackTrace()}")
+            }
+        }
+        )
+
+    }
+
+    fun getArticlesBySource() {
+        val service = Api.retrofitService.getArticlesBySource(sourceName.value, "pt")
+        service.enqueue(object : Callback<TopNewsResponse> {
+            override fun onResponse(
+                call: Call<TopNewsResponse>,
+                response: Response<TopNewsResponse>
+            ) {
+                if (response.isSuccessful){
+                    _getArticleBySource.value = response.body()!!
+                    Log.d("Categoria:", "${_getArticleBySource.value}")
+                } else {
+                    Log.d("error", "${response.errorBody()}")
+                }
+            }
             override fun onFailure(call: Call<TopNewsResponse>, t: Throwable) {
                 Log.d("error", "${t.printStackTrace()}")
             }

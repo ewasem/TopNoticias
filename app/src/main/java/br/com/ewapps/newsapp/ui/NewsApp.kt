@@ -1,6 +1,5 @@
 package br.com.ewapps.newsapp.ui
 
-import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,7 +21,6 @@ import br.com.ewapps.newsapp.ui.screen.Categories
 import br.com.ewapps.newsapp.ui.screen.DetailScreen
 import br.com.ewapps.newsapp.ui.screen.Sources
 import br.com.ewapps.newsapp.ui.screen.TopNews
-import com.google.gson.Gson
 
 @Composable
 fun NewsApp() {
@@ -52,17 +50,20 @@ fun Navigation(
     val articles = newsManager.newsResponse.value.articles
     Log.d("Notícias", "$articles")
     articles?.let {
-        NavHost(navController = navController, startDestination =
-        BottomMenuScreen.TopNews.route, modifier = Modifier.padding(paddingValues = paddingValues)) {
+        NavHost(
+            navController = navController,
+            startDestination =
+            BottomMenuScreen.TopNews.route,
+            modifier = Modifier.padding(paddingValues = paddingValues)
+        ) {
             bottomNavigation(navController = navController, articles, newsManager)
 
-
-
-            composable("DetailScreen/{index}",
+            composable(
+                "DetailScreen/{index}",
                 arguments = listOf(navArgument("index") { type = NavType.IntType })
             ) { navBackStackEntry ->
                 val index = navBackStackEntry.arguments?.getInt("index")
-                index?.let{
+                index?.let {
                     val article = articles[index]
                     DetailScreen(
                         article = article,
@@ -70,7 +71,6 @@ fun Navigation(
                         navController = navController
                     )
                 }
-
             }
 
             composable(
@@ -86,13 +86,15 @@ fun Navigation(
                     DetailScreen(article, scrollState, navController)
                 }
             }
-
         }
     }
-
 }
 
-fun NavGraphBuilder.bottomNavigation(navController: NavController, article: List<Article>, newsManager: NewsManager) {
+fun NavGraphBuilder.bottomNavigation(
+    navController: NavController,
+    article: List<Article>,
+    newsManager: NewsManager
+) {
     composable(BottomMenuScreen.TopNews.route) {
         TopNews(navController = navController, articles = article)
     }
@@ -104,7 +106,7 @@ fun NavGraphBuilder.bottomNavigation(navController: NavController, article: List
         }, newsManager = newsManager, navController = navController)
     }
     composable(BottomMenuScreen.Sources.route) {
-        Sources()
+        Sources(newsManager = newsManager)
     }
 
 }

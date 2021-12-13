@@ -18,4 +18,10 @@ interface NewsService {
         @Query("country") country: String
     ): Call<TopNewsResponse>
 
+    @GET("everything")
+    fun getArticlesBySource(
+        @Query("domains") domains: String,
+        @Query("language") language: String
+    ): Call<TopNewsResponse>
+
 }
