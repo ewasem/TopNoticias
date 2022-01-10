@@ -7,7 +7,6 @@ enum class ArticleCategory(
 ) {
     BUSINESS("business", "negócios"),
     ENTERTAINMENT("entertainment", "entretenimento"),
-    GENERAL("general", "geral"),
     HEALTH("health", "saúde"),
     SCIENCE("science", "ciência"),
     SPORTS("sports", "esportes"),
@@ -16,8 +15,7 @@ enum class ArticleCategory(
 
 fun getAllArticleCategory(): List<ArticleCategory> {
     return listOf(
-        ArticleCategory.BUSINESS, ArticleCategory.ENTERTAINMENT,
-        ArticleCategory.GENERAL, ArticleCategory.HEALTH, ArticleCategory.SCIENCE,
+        ArticleCategory.BUSINESS, ArticleCategory.ENTERTAINMENT, ArticleCategory.HEALTH, ArticleCategory.SCIENCE,
         ArticleCategory.SPORTS, ArticleCategory.TECHNOLOGY
     )
 }

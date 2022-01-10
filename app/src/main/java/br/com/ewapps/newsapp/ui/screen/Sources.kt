@@ -23,9 +23,10 @@ import androidx.compose.ui.unit.dp
 import br.com.ewapps.newsapp.R
 import br.com.ewapps.newsapp.model.Article
 import br.com.ewapps.newsapp.network.NewsManager
+import br.com.ewapps.newsapp.ui.MainViewModel
 
 @Composable
-fun Sources(newsManager: NewsManager) {
+fun Sources(viewModel: MainViewModel) {
     val items = listOf(
         "R7" to "r7.com",
         "UOL" to "uol.com.br",
@@ -36,7 +37,7 @@ fun Sources(newsManager: NewsManager) {
     )
     Scaffold(topBar = {
         TopAppBar(
-            title = { Text(text = "Fonte: ${newsManager.sourceName.value}") },
+            title = { Text(text = "Fonte: ${viewModel.sourceName.value}") },
             actions = {
                 var menuExpanded by remember { mutableStateOf(false) }
                 IconButton(onClick = { menuExpanded = true }) {
@@ -51,7 +52,8 @@ fun Sources(newsManager: NewsManager) {
                     ) {
                         items.forEach {
                             DropdownMenuItem(onClick = {
-                                newsManager.sourceName.value = it.second
+                                viewModel.sourceName.value = it.second
+                                viewModel.getArticlesBySource()
                                 menuExpanded = false
                             }) {
                                 Text(text = it.first)
@@ -62,8 +64,8 @@ fun Sources(newsManager: NewsManager) {
             })
 
     }) {
-        newsManager.getArticlesBySource()
-        val articles = newsManager.getArticleBySource.value
+        viewModel.getArticlesBySource()
+        val articles = viewModel.getArticleBySource.collectAsState().value
         SourceContent(articles = articles.articles ?: listOf())
     }
 }

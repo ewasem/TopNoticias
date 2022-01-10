@@ -6,11 +6,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
@@ -25,6 +27,7 @@ import br.com.ewapps.newsapp.model.MockData
 import br.com.ewapps.newsapp.model.MockData.getTimeAgo
 import br.com.ewapps.newsapp.model.getAllArticleCategory
 import br.com.ewapps.newsapp.network.NewsManager
+import br.com.ewapps.newsapp.ui.MainViewModel
 import com.google.gson.Gson
 import com.skydoves.landscapist.coil.CoilImage
 
@@ -32,7 +35,7 @@ import com.skydoves.landscapist.coil.CoilImage
 @Composable
 fun Categories(
     onFetchCategory: (String) -> Unit = {},
-    newsManager: NewsManager,
+    viewModel: MainViewModel,
     navController: NavController
 ) {
     val tabsItems = getAllArticleCategory()
@@ -42,11 +45,11 @@ fun Categories(
                 val category = tabsItems[it]
                 CategoryTab(
                     category = category.categoryName, categoryTranslated = category.categoryTranslated , onFetchCategory = onFetchCategory,
-                    isSelected = newsManager.selectedCategory.value == category
+                    isSelected = viewModel.selectedCategory.collectAsState().value == category
                 )
             }
         }
-        ArticleContent(articles = newsManager.getArticleByCategory.value.articles ?: listOf(), navController = navController)
+        ArticleContent(articles = viewModel.getArticleByCategory.collectAsState().value.articles ?: listOf(), navController = navController)
     }
 }
 
@@ -77,14 +80,14 @@ fun CategoryTab(category: String, categoryTranslated: String, isSelected: Boolea
 @Composable
 fun ArticleContent(navController: NavController, articles: List<Article>, modifier: Modifier = Modifier) {
     LazyColumn {
-        items(articles.size) { index ->
+        items(articles){ article ->
 
             Card(
                 modifier
-                .padding(8.dp).clickable {
+                    .padding(8.dp)
+                    .clickable {
 
-                        val art = articles[index]
-                        val json = Uri.encode(Gson().toJson(art))
+                        val json = Uri.encode(Gson().toJson(article))
 
                         navController.navigate("DetailScreen/${json}")
                     },
@@ -96,7 +99,7 @@ fun ArticleContent(navController: NavController, articles: List<Article>, modifi
                         .padding(8.dp)
                 ) {
                     CoilImage(
-                        imageModel = articles[index].urlToImage,
+                        imageModel = article.urlToImage,
                         modifier.size(100.dp),
                         placeHolder = painterResource(id = R.drawable.breaking_news),
                         error = painterResource(id = R.drawable.breaking_news)
@@ -104,7 +107,7 @@ fun ArticleContent(navController: NavController, articles: List<Article>, modifi
 
                     Column(modifier.padding(8.dp)) {
                         Text(
-                            text = articles[index].title ?: "",
+                            text = article.title ?: "",
                             fontWeight = FontWeight.Bold,
                             maxLines = 3, overflow = TextOverflow.Ellipsis
                         )
@@ -112,11 +115,11 @@ fun ArticleContent(navController: NavController, articles: List<Article>, modifi
                             modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(text = articles[index].author ?: "", modifier = Modifier.fillMaxWidth(.5f),
+                            Text(text = article.author ?: "", modifier = Modifier.fillMaxWidth(.5f),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis)
 
-                            val time = articles[index].publishedAt?.let { MockData.stringToDate(it).getTimeAgo() }
+                            val time = article.publishedAt?.let { MockData.stringToDate(it).getTimeAgo() }
 
                             if (time == null) {
                                 Text(text = "") } else {
@@ -128,7 +131,6 @@ fun ArticleContent(navController: NavController, articles: List<Article>, modifi
                         }
                     }
                 }
-
             }
         }
     }

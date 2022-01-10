@@ -74,9 +74,6 @@ object MockData {
         )
     )
 
-    fun getNews(newsId: Int?):NewsData{
-        return topNewsList.first{it.id == newsId}
-    }
 
     //Retorna a string que irá informar quanto tempo atrás a reportagem foi publicada
     fun Date.getTimeAgo(): String {

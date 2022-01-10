@@ -1,5 +1,6 @@
 package br.com.ewapps.newsapp.ui.screen
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,6 +11,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -20,21 +23,41 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import br.com.ewapps.newsapp.model.Article
 import br.com.ewapps.newsapp.model.MockData
 import br.com.ewapps.newsapp.model.MockData.getTimeAgo
 import com.skydoves.landscapist.coil.CoilImage
 import br.com.ewapps.newsapp.R
+import br.com.ewapps.newsapp.components.SearchBar
+import br.com.ewapps.newsapp.ui.MainViewModel
+import com.google.gson.Gson
 
 @Composable
-fun TopNews(navController: NavController, articles: List<Article>) {
+fun TopNews(navController: NavController, articles: List<Article>, query: MutableState<String>, viewModel: MainViewModel) {
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = "Principais Notícias", fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 16.dp))
+        //Text(text = "Principais Notícias", fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 16.dp, bottom = 16.dp))
+        SearchBar(query = query, viewModel = viewModel)
+        val searchedText = query.value
+        val resultList = mutableListOf<Article>()
+        if (searchedText != ""){
+            resultList.addAll(
+                viewModel.getSearchedArticle.collectAsState().value.articles ?: articles
+            )
+        } else {
+            resultList.addAll(articles)
+        }
         LazyColumn {
-            items(articles.size) { index ->
-                TopNewsItem(article = articles[index],
-                    onNewsClick = { navController.navigate("DetailScreen/$index") })
+            items(resultList.size) { index ->
+
+                    TopNewsItem(article = resultList[index],
+                        onNewsClick = {
+                            val json = Uri.encode(Gson().toJson(resultList[index]))
+
+                            navController.navigate("DetailScreen/${json}")
+                        })
+
 
             }
         }
@@ -64,12 +87,21 @@ fun TopNewsItem(article: Article, onNewsClick: () -> Unit = {}) {
             .padding(top = 205.dp, start = 16.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(
-            text = MockData.stringToDate(publishedAt = article.publishedAt!!).getTimeAgo(),
-            color = Color.DarkGray,
-            fontWeight = FontWeight.SemiBold
-        )
-        Text(text = article.title!!, color = Color.Gray, fontWeight = FontWeight.SemiBold)
+        val time = article.publishedAt?.let { MockData.stringToDate(it).getTimeAgo() }
+
+        if (time == null) {
+            Text(text = "",
+                color = Color.DarkGray,
+                fontWeight = FontWeight.SemiBold) } else {
+
+            Text(
+                text = time,
+                color = Color.DarkGray,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        Text(text = article.title ?: "", color = Color.Gray, fontWeight = FontWeight.SemiBold)
     }}
 }
 
