@@ -41,8 +41,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _isLoading.value = true
         viewModelScope.launch(Dispatchers.IO + errorHandler) {
             _newsResponse.value = repository.getArticles()
+            _isLoading.value = false
         }
-        _isLoading.value = false
+
 
     }
 
@@ -58,8 +59,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _isLoading.value = true
         viewModelScope.launch(Dispatchers.IO + errorHandler) {
             _getArticleByCategory.value = repository.getArticlesByCategory(category)
+            _isLoading.value = false
         }
-        _isLoading.value = false
+
     }
 
     val sourceName = MutableStateFlow("uol.com.br")
@@ -81,16 +83,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _isLoading.value = true
         viewModelScope.launch(Dispatchers.IO + errorHandler) {
             _getArticleBySource.value = repository.getArticlesBySource(sourceName.value)
+            _isLoading.value = false
         }
-        _isLoading.value = false
+
     }
 
     fun getSearchedArticles(query: String) {
         _isLoading.value = true
         viewModelScope.launch(Dispatchers.IO + errorHandler) {
             _getSearchedArticle.value = repository.getSearchedArticles(query)
+            _isLoading.value = false
         }
-        _isLoading.value = false
+
     }
 
 }

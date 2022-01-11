@@ -23,14 +23,14 @@ import br.com.ewapps.newsapp.model.AssetParamTypeUrl
 import br.com.ewapps.newsapp.model.Url
 import br.com.ewapps.newsapp.ui.screen.*
 
-@SuppressLint("UnrememberedMutableState")
+
 @ExperimentalAnimationApi
 @Composable
 fun NewsApp(mainViewModel: MainViewModel) {
     val scrollState = rememberScrollState()
     val navController = rememberNavController()
-    val visible: MutableState<Boolean> = mutableStateOf(true)
-        MainScreen(navController = navController, scrollState = scrollState, mainViewModel, visible)
+
+        MainScreen(navController = navController, scrollState = scrollState, mainViewModel)
 
 }
 
@@ -39,24 +39,21 @@ fun NewsApp(mainViewModel: MainViewModel) {
 fun MainScreen(
     navController: NavHostController,
     scrollState: ScrollState,
-    mainViewModel: MainViewModel,
-    visible: MutableState<Boolean>
+    mainViewModel: MainViewModel
 ) {
 
     Scaffold(
         bottomBar = {
 
-            if (visible.value) {
                 BottomMenu(navController = navController)
-            }
+
 
     }) {
         Navigation(
             navController = navController,
             scrollState = scrollState,
             paddingValues = it,
-            viewModel = mainViewModel,
-            visible = visible
+            viewModel = mainViewModel
         )
     }
 }
@@ -66,12 +63,13 @@ fun Navigation(
     navController: NavHostController,
     scrollState: ScrollState,
     paddingValues: PaddingValues,
-    viewModel: MainViewModel,
-    visible: MutableState<Boolean>
+    viewModel: MainViewModel
 ) {
 
     val articles = mutableListOf<Article>()
     val topArticles = viewModel.newsResponse.collectAsState().value.articles
+    val loading by viewModel.isLoading.collectAsState()
+    val error by viewModel.isError.collectAsState()
     articles.addAll(topArticles ?: listOf())
     Log.d("Notícias", "$articles")
     articles?.let {
@@ -83,7 +81,9 @@ fun Navigation(
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
             val queryState = mutableStateOf(viewModel.query.value)
-            bottomNavigation(navController = navController, articles, viewModel, query = queryState, visible = visible)
+            val isLoading = mutableStateOf(loading)
+            val isError = mutableStateOf(error)
+            bottomNavigation(navController = navController, articles, viewModel, query = queryState, isError = isError, isLoading = isLoading)
 
             composable(
                 "DetailScreen/{article}",
@@ -104,24 +104,19 @@ fun Navigation(
                         articles.clear()
                         articles.addAll(viewModel.newsResponse.collectAsState().value.articles ?: listOf())
                     }
-
-                    visible.value = false
                     DetailScreen(article, scrollState, navController)
                 }
-
             }
             composable(
                 "WebScreen/{url}",
                 arguments = listOf(navArgument("url") {
                     type = AssetParamTypeUrl()
                 })
-
-
             ) {
                 val urlString = it.arguments?.getParcelable<Url>("url")
-
-                visible.value
-                WebScreen(urlString!!)
+                urlString?.let{
+                    WebScreen(urlString)
+                }
             }
 
         }
@@ -134,16 +129,17 @@ fun NavGraphBuilder.bottomNavigation(
     article: List<Article>,
     viewModel: MainViewModel,
     query: MutableState<String>,
-    visible: MutableState<Boolean>
+    isLoading: MutableState<Boolean>,
+    isError: MutableState<Boolean>
 ) {
     composable(BottomMenuScreen.TopNews.route) {
-        visible.value = true
-        TopNews(navController = navController, articles = article, query, viewModel)
+
+        TopNews(navController = navController, articles = article, query, viewModel, isLoading = isLoading, isError = isError)
 
     }
     composable(BottomMenuScreen.Categories.route) {
 
-        visible.value = true
+
         Categories(viewModel = viewModel, onFetchCategory = {
 
             if (it == "") {
@@ -156,12 +152,12 @@ fun NavGraphBuilder.bottomNavigation(
 
 
 
-        }, navController = navController)
+        }, navController = navController, isLoading = isLoading, isError = isError)
     }
     composable(BottomMenuScreen.Sources.route) {
 
-        visible.value = true
-        Sources(viewModel)
+
+        Sources(viewModel, isError = isError, isLoading = isLoading)
     }
 
 }

@@ -21,12 +21,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import br.com.ewapps.newsapp.R
+import br.com.ewapps.newsapp.components.ErrorUI
+import br.com.ewapps.newsapp.components.LoadingUI
 import br.com.ewapps.newsapp.model.Article
-import br.com.ewapps.newsapp.network.NewsManager
 import br.com.ewapps.newsapp.ui.MainViewModel
 
 @Composable
-fun Sources(viewModel: MainViewModel) {
+fun Sources(
+    viewModel: MainViewModel,
+    isLoading: MutableState<Boolean>,
+    isError: MutableState<Boolean>
+) {
     val items = listOf(
         "R7" to "r7.com",
         "UOL" to "uol.com.br",
@@ -37,7 +42,7 @@ fun Sources(viewModel: MainViewModel) {
     )
     Scaffold(topBar = {
         TopAppBar(
-            title = { Text(text = "Fonte: ${viewModel.sourceName.value}") },
+            title = { Text(text = "Fonte: ${viewModel.sourceName.collectAsState().value}") },
             actions = {
                 var menuExpanded by remember { mutableStateOf(false) }
                 IconButton(onClick = { menuExpanded = true }) {
@@ -62,11 +67,20 @@ fun Sources(viewModel: MainViewModel) {
                     }
                 }
             })
-
     }) {
-        viewModel.getArticlesBySource()
-        val articles = viewModel.getArticleBySource.collectAsState().value
-        SourceContent(articles = articles.articles ?: listOf())
+        when {
+            isLoading.value -> {
+                LoadingUI()
+            }
+            isError.value -> {
+                ErrorUI()
+            }
+            else -> {
+                viewModel.getArticlesBySource()
+                val articles = viewModel.getArticleBySource.collectAsState().value
+                SourceContent(articles = articles.articles ?: listOf())
+            }
+        }
     }
 }
 

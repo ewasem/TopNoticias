@@ -12,6 +12,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,6 +23,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import br.com.ewapps.newsapp.R
+import br.com.ewapps.newsapp.components.ErrorUI
+import br.com.ewapps.newsapp.components.LoadingUI
 import br.com.ewapps.newsapp.model.Article
 import br.com.ewapps.newsapp.model.MockData
 import br.com.ewapps.newsapp.model.MockData.getTimeAgo
@@ -36,26 +39,49 @@ import com.skydoves.landscapist.coil.CoilImage
 fun Categories(
     onFetchCategory: (String) -> Unit = {},
     viewModel: MainViewModel,
-    navController: NavController
+    navController: NavController,
+    isLoading: MutableState<Boolean>,
+    isError: MutableState<Boolean>
 ) {
     val tabsItems = getAllArticleCategory()
     Column {
-        LazyRow {
-            items(tabsItems.size) {
-                val category = tabsItems[it]
-                CategoryTab(
-                    category = category.categoryName, categoryTranslated = category.categoryTranslated , onFetchCategory = onFetchCategory,
-                    isSelected = viewModel.selectedCategory.collectAsState().value == category
-                )
+        when {
+            isLoading.value -> {
+                LoadingUI()
+            }
+            isError.value -> {
+                ErrorUI()
+            }
+            else -> {
+                LazyRow {
+                    items(tabsItems.size) {
+                        val category = tabsItems[it]
+                        CategoryTab(
+                            category = category.categoryName,
+                            categoryTranslated = category.categoryTranslated,
+                            onFetchCategory = onFetchCategory,
+                            isSelected = viewModel.selectedCategory.collectAsState().value == category
+                        )
+                    }
+                }
             }
         }
-        ArticleContent(articles = viewModel.getArticleByCategory.collectAsState().value.articles ?: listOf(), navController = navController)
+
+        ArticleContent(
+            articles = viewModel.getArticleByCategory.collectAsState().value.articles ?: listOf(),
+            navController = navController
+        )
     }
 }
 
 
 @Composable
-fun CategoryTab(category: String, categoryTranslated: String, isSelected: Boolean = false, onFetchCategory: (String) -> Unit) {
+fun CategoryTab(
+    category: String,
+    categoryTranslated: String,
+    isSelected: Boolean = false,
+    onFetchCategory: (String) -> Unit
+) {
     val background =
         if (isSelected) colorResource(id = R.color.purple_200) else colorResource(id = R.color.purple_700)
     Surface(
@@ -78,9 +104,13 @@ fun CategoryTab(category: String, categoryTranslated: String, isSelected: Boolea
 
 //Cria o padrão que cada notícia recebida irá aparecer na lazyColumn
 @Composable
-fun ArticleContent(navController: NavController, articles: List<Article>, modifier: Modifier = Modifier) {
+fun ArticleContent(
+    navController: NavController,
+    articles: List<Article>,
+    modifier: Modifier = Modifier
+) {
     LazyColumn {
-        items(articles){ article ->
+        items(articles) { article ->
 
             Card(
                 modifier
@@ -115,14 +145,18 @@ fun ArticleContent(navController: NavController, articles: List<Article>, modifi
                             modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(text = article.author ?: "", modifier = Modifier.fillMaxWidth(.5f),
+                            Text(
+                                text = article.author ?: "", modifier = Modifier.fillMaxWidth(.5f),
                                 maxLines = 1,
-                                overflow = TextOverflow.Ellipsis)
+                                overflow = TextOverflow.Ellipsis
+                            )
 
-                            val time = article.publishedAt?.let { MockData.stringToDate(it).getTimeAgo() }
+                            val time =
+                                article.publishedAt?.let { MockData.stringToDate(it).getTimeAgo() }
 
                             if (time == null) {
-                                Text(text = "") } else {
+                                Text(text = "")
+                            } else {
 
                                 Text(
                                     text = time

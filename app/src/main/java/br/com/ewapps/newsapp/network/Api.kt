@@ -12,7 +12,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 //Prepara o retrofit
 
 object Api {
-    const val API_KEY = ""
+    const val API_KEY = "949515592dcd43f5abd45e1e11037137"
     private val BASE_URL = "https://newsapi.org/v2/"
     private val moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
